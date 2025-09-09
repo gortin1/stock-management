@@ -1,0 +1,38 @@
+package com.api.stock_management.application;
+
+import com.api.stock_management.domain.Product;
+import com.api.stock_management.domain.repository.IProduct;
+import lombok.Data;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Data
+@Service
+public class ProductService {
+
+    @Autowired
+    private IProduct iProduct;
+
+    public Product createProduct(Product product){
+        return iProduct.save(product);
+    }
+    public List<Product> getallProducts(){
+        return iProduct.FindAll();
+    }
+    public Product getProduct(Long id){
+        return iProduct.FindById(id).orElseThrow(()-> new RuntimeException("Produto não encontrado"));
+    }
+    public Product updateProduct(Long id, Product product){
+        product.setId(id);
+        return iProduct.save(product);
+    }
+    public void inactiveProduct(Long id){
+        Product product = getProduct(id);
+        product.setStatus(false);
+        iProduct.save(product);
+    }
+
+
+}

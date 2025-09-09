@@ -10,7 +10,7 @@ import java.util.Optional;
 public interface IProduct {
 
     Product save(Product product);
-    Optional <Product> findById(Long id);
+    Optional <Product> FindById(Long id);
     List<Product> FindAll();
 
 

@@ -9,7 +9,7 @@ public interface ISeller {
     Seller save (Seller seller);
     List<Seller> FindAll();
     Optional<Seller> FindByEmail(String email);
-    Optional<Seller> FindByCelular (int celular);
+    Optional<Seller> FindByCelular (String celular);
 
 
 
