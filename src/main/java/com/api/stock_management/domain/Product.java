@@ -10,16 +10,16 @@ public class Product {
 
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
-    private Long Id;
+    private Long id;
 
     private String nome;
-    private int preco;
-    private double quantidade;
-    private boolean status;
+    private Double preco;
+    private Integer quantidade;
+    private String status;
     private String img;
 
 
-    @ManyToMany
+    @ManyToOne
     @JoinColumn(name = "seller_id")
     private Seller seller;
 
