@@ -30,7 +30,7 @@ public class ProductService {
     }
     public void inactiveProduct(Long id){
         Product product = getProduct(id);
-        product.setStatus(false);
+        product.setStatus("Inativo");
         iProduct.save(product);
     }
 
