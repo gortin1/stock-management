@@ -1,4 +1,4 @@
-package com.api.stock_management.application;
+package com.api.stock_management.application.service;
 
 
 import com.api.stock_management.domain.Sale;
@@ -14,14 +14,14 @@ public class SellerService {
     @Autowired
     private ISeller iSeller;
 
-    @Autowired
-    private WhatsAppService whatsAppService;
+//    @Autowired
+//    private WhatsAppService whatsAppService;
+//
+//    @Autowired
+//    private JwtUtil jwtUtil;
 
-    @Autowired
-    private JwtUtil jwtUtil;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+//    @Autowired
+//    private PasswordEncoder passwordEncoder;
 
     public Seller createSeller(Seller seller){
         seller.setStatus(false);
@@ -39,7 +39,7 @@ public class SellerService {
         return iSeller.save(seller);
     }
     public Seller activateSeller(String celular, String codigo){
-        Seller seller = iSeller.FindByCelular(celular)
+        Seller seller = iSeller.findByCelular(celular)
                 .orElseThrow(()-> new RuntimeException("Seller não encontrado"));
         if (!codigo.equalsIgnoreCase(seller.getCodigoAtivacao())){
             throw new RuntimeException("Codigo inválido");
@@ -50,7 +50,7 @@ public class SellerService {
         
     }
     public String login(String email, String senha){
-        Seller seller = iSeller.FindByEmail(email)
+        Seller seller = iSeller.findByEmail(email)
                 .orElseThrow(()-> new RuntimeException("Email não encontrado"));
         if (!passwordEncoder.matches(senha, seller.getSenha())){
             throw new RuntimeException("Senha incorreta");

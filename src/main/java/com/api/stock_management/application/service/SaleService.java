@@ -1,4 +1,4 @@
-package com.api.stock_management.application;
+package com.api.stock_management.application.service;
 
 
 import com.api.stock_management.domain.Product;
@@ -18,7 +18,7 @@ public class SaleService {
     private IProduct iProduct;
 
     public Sale createSale (Long productId, Integer quantidade){
-        Product product = iProduct.FindById(productId)
+        Product product = iProduct.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
 
         if (!"Ativo".equalsIgnoreCase(product.getStatus())) {

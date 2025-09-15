@@ -17,7 +17,7 @@ public class Seller {
     private String nome;
     private String cnpj;
     private String email;
-    private int celular;
+    private String celular;
     private String senha;
     private boolean status;
 

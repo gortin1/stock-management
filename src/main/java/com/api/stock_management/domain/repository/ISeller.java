@@ -4,12 +4,14 @@ import com.api.stock_management.domain.Seller;
 import java.util.List;
 import java.util.Optional;
 
-public interface ISeller {
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface ISeller extends JpaRepository<Seller, Long> {
 
     Seller save (Seller seller);
-    List<Seller> FindAll();
-    Optional<Seller> FindByEmail(String email);
-    Optional<Seller> FindByCelular (String celular);
+    List<Seller> findAll();
+    Optional<Seller> findByEmail(String email);
+    Optional<Seller> findByCelular (String celular);
 
 
 

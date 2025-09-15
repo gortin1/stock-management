@@ -1,4 +1,4 @@
-package com.api.stock_management.application;
+package com.api.stock_management.application.service;
 
 import com.api.stock_management.domain.Product;
 import com.api.stock_management.domain.repository.IProduct;
@@ -10,7 +10,7 @@ import java.util.List;
 
 @Data
 @Service
-public class ProductService {
+public class ProductService{
 
     @Autowired
     private IProduct iProduct;
@@ -19,10 +19,10 @@ public class ProductService {
         return iProduct.save(product);
     }
     public List<Product> getallProducts(){
-        return iProduct.FindAll();
+        return iProduct.findAll();
     }
     public Product getProduct(Long id){
-        return iProduct.FindById(id).orElseThrow(()-> new RuntimeException("Produto não encontrado"));
+        return iProduct.findById(id).orElseThrow(()-> new RuntimeException("Produto não encontrado"));
     }
     public Product updateProduct(Long id, Product product){
         product.setId(id);

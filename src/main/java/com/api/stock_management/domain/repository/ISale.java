@@ -5,8 +5,10 @@ import com.api.stock_management.domain.Sale;
 import java.util.List;
 import java.util.Optional;
 
-public interface ISale {
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface ISale extends JpaRepository<Sale, Long> {
     Sale save (Sale sale);
-    List<Sale> FindAll();
-    Optional<Sale> FindById(Long id);
+    List<Sale> findAll();
+    Optional<Sale> findById(Long id);
 }
