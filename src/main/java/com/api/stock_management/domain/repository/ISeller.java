@@ -12,7 +12,4 @@ public interface ISeller extends JpaRepository<Seller, Long> {
     List<Seller> findAll();
     Optional<Seller> findByEmail(String email);
     Optional<Seller> findByCelular (String celular);
-
-
-
 }
