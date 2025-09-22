@@ -1,63 +1,75 @@
 package com.api.stock_management.application.service;
 
-
-import com.api.stock_management.domain.Sale;
-import com.api.stock_management.domain.Seller;
-import com.api.stock_management.domain.repository.ISeller;
+import com.api.stock_management.application.dto.seller.SellerActivateRequestDTO;
+import com.api.stock_management.application.dto.seller.SellerRequestDTO;
+import com.api.stock_management.application.dto.seller.SellerResponseDTO;
+import com.api.stock_management.domain.model.Seller;
+import com.api.stock_management.domain.repository.SellerRepository;
+import com.api.stock_management.infrastructure.messaging.TwilioService;
+import jakarta.persistence.EntityExistsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import java.util.Random;
 
 @Service
 public class SellerService {
 
     @Autowired
-    private ISeller iSeller;
+    private SellerRepository sellerRepository;
 
-//    @Autowired
-//    private WhatsAppService whatsAppService;
-//
-//    @Autowired
-//    private JwtUtil jwtUtil;
+    @Autowired
+    private TwilioService twilioService;
 
-//    @Autowired
-//    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-    public Seller createSeller(Seller seller){
-        seller.setStatus(false);
-        seller.setSenha(passwordEncoder.encode(seller.getSenha()));
+    @Transactional
+    public SellerResponseDTO createSeller(SellerRequestDTO sellerRequestDTO){
 
-        String codigo = whatsAppService.generateActivationCode();
+        if (sellerRepository.findByEmail(sellerRequestDTO.getEmail()).isPresent() || sellerRepository.findByCelular(sellerRequestDTO.getCelular()).isPresent()) {
+            throw new EntityExistsException("Usuário já cadastrado.");
+        }
+
+        Seller newSeller = new Seller();
+        newSeller.setNome(sellerRequestDTO.getNome());
+        newSeller.setCnpj(sellerRequestDTO.getCnpj());
+        newSeller.setEmail(sellerRequestDTO.getEmail());
+        newSeller.setCelular(sellerRequestDTO.getCelular());
+        newSeller.setSenha(passwordEncoder.encode(sellerRequestDTO.getSenha()));
+        newSeller.setStatus(false);
+
+        String codigo = twilioService.generateActivationCode();
+        newSeller.setCodigoAtivacao(codigo);
 
         try {
-            whatsAppService.sendActivationCode(seller.getCelular(),codigo);
+            twilioService.sendActivationCode(newSeller.getCelular(), codigo);
         } catch (Exception e) {
-            throw new RuntimeException("Falha ao enviar o codigo de ativação: ",e);
+            throw new RuntimeException("Falha ao enviar código de ativação: " + e);
         }
 
-        seller.setCodigoAtivacao();
-        return iSeller.save(seller);
+        Seller savedSeller = sellerRepository.save(newSeller);
+        return new SellerResponseDTO(savedSeller);
     }
-    public Seller activateSeller(String celular, String codigo){
-        Seller seller = iSeller.findByCelular(celular)
-                .orElseThrow(()-> new RuntimeException("Seller não encontrado"));
-        if (!codigo.equalsIgnoreCase(seller.getCodigoAtivacao())){
-            throw new RuntimeException("Codigo inválido");
+
+    @Transactional
+    public SellerResponseDTO activateSeller(SellerActivateRequestDTO sellerActivateRequestDTO){
+        Seller seller = sellerRepository.findByCelular(sellerActivateRequestDTO.getCelular())
+                .orElseThrow(()-> new RuntimeException("Vendedor não encontrado."));
+
+        if (seller.isStatus()) {
+            throw new IllegalStateException("Esta conta já está ativa.");
         }
+
+        if (!sellerActivateRequestDTO.getCodigoAtivacao().equals(seller.getCodigoAtivacao())) {
+            throw new IllegalArgumentException("Codigo inválido");
+        }
+
         seller.setStatus(true);
         seller.setCodigoAtivacao(null);
-        return iSeller.save(seller);
-        
-    }
-    public String login(String email, String senha){
-        Seller seller = iSeller.findByEmail(email)
-                .orElseThrow(()-> new RuntimeException("Email não encontrado"));
-        if (!passwordEncoder.matches(senha, seller.getSenha())){
-            throw new RuntimeException("Senha incorreta");
-        }
-        if (!seller.isStatus()){
-            throw new RuntimeException("Seller não ativo");
-        }
-        return jwtUtil.generateToken(email);
+
+        Seller activatedSeller = sellerRepository.save(seller);
+        return new SellerResponseDTO(activatedSeller);
     }
 }

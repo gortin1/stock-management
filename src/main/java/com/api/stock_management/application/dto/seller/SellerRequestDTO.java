@@ -1,4 +1,4 @@
-package com.api.stock_management.domain.dto.seller;
+package com.api.stock_management.application.dto.seller;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -15,20 +15,17 @@ public class SellerRequestDTO {
     @NotBlank(message = "O nome não pode ficar em branco.")
     private String nome;
 
-    @NotBlank(message = "O cnpj não pode ficar em branco.")
+    @NotBlank(message = "O CNPJ não pode ficar em branco.")
     private String cnpj;
 
-    @NotBlank(message = "O Email não pode ficar em branco.")
-    @Email(message = "Formato de email invalido")
+    @NotBlank(message = "O email não pode ficar em branco.")
+    @Email(message = "Formato de email inválido.")
     private String email;
 
-    @NotBlank(message = "O campo de celular não deve ficar em branco.")
+    @NotBlank(message = "O campo de celular não pode ficar em branco.")
     private String celular;
 
     @NotBlank(message = "A senha não pode estar em branco.")
     @Size(min = 6, message = "A senha deve ter no mínimo 6 caracteres.")
     private String senha;
-
-    @NotBlank
-    private String codigoAtivacao;
 }
