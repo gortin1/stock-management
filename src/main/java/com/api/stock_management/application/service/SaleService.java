@@ -8,11 +8,13 @@ import com.api.stock_management.domain.model.Seller;
 import com.api.stock_management.domain.repository.ProductRepository;
 import com.api.stock_management.domain.repository.SaleRepository;
 import jakarta.persistence.EntityNotFoundException;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 
 @Service
 public class SaleService {
@@ -23,6 +25,15 @@ public class SaleService {
     @Autowired
     private ProductRepository productRepository;
 
+    @Transactional(readOnly = true)
+    public List<SaleResponseDTO> getAllSalesBySeller(){
+        Seller authenticatedSeller = getAuthenticatedSeller();
+        List<Sale> sales = saleRepository.findBySeller(authenticatedSeller);
+
+        return sales.stream()
+                .map(SaleResponseDTO::new)
+                .collect(Collectors.toList());
+    }
     @Transactional
     public SaleResponseDTO createSale(SaleRequestDTO saleRequestDTO) {
         Seller authenticatedSeller = (Seller) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -59,5 +70,8 @@ public class SaleService {
         if (product.getQuantidade() < saleRequestDTO.getQuantidade()) {
             throw new IllegalStateException("Estoque insuficiente. Quantidade disponível: " + product.getQuantidade());
         }
+    }
+    private Seller getAuthenticatedSeller() {
+        return (Seller) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 }

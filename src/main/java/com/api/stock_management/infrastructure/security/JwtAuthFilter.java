@@ -27,15 +27,28 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         var token = this.recoverToken(request);
 
-        if (token != null) {
-            var email = tokenService.validateToken(token);
+        // A sua verificação está correta
+        if (token != null && !token.isBlank()) {
 
-            sellerRepository.findByEmail(email).ifPresent(seller -> {
-                var authentication = new UsernamePasswordAuthenticationToken(seller, null, seller.getAuthorities());
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            });
+            try {
+                // TENTAMOS validar o token
+                var email = tokenService.validateToken(token);
 
+                sellerRepository.findByEmail(email).ifPresent(seller -> {
+                    var authentication = new UsernamePasswordAuthenticationToken(seller, null, seller.getAuthorities());
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                });
+
+            } catch (Exception e) {
+                // SE O TOKEN FALHAR A VALIDAÇÃO (malformado, expirado, etc.)
+                // Nós apanhamos o erro e não fazemos nada.
+                // O SecurityContextHolder permanece vazio, e o utilizador não é autenticado.
+                // Pode adicionar um log aqui se quiser: logger.warn("Invalid JWT: {}", e.getMessage());
+                SecurityContextHolder.clearContext(); // Limpa o contexto por segurança
+            }
         }
+
+        // Independentemente do que acontecer, continuamos a cadeia de filtros
         filterChain.doFilter(request, response);
     }
 

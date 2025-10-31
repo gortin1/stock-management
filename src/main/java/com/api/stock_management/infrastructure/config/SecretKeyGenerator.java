@@ -9,7 +9,7 @@ import java.util.Base64;
 public class SecretKeyGenerator {
 
     public static void main(String[] args) {
-        SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+        SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS512);
 
         String secretString = Base64.getEncoder().encodeToString(key.getEncoded());
 
