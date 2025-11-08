@@ -22,6 +22,6 @@ public class SaleResponseDTO {
         this.produtoNome = sale.getProduct().getNome();
         this.quantidadeVendida = sale.getQuantidadeVendida();
         this.precoNoMomentoDaVenda = sale.getPrecoNoMomentoDaVenda();
-        this.dataDaVenda = getDataDaVenda();
+        this.dataDaVenda = sale.getDataDaVenda();
     }
 }
