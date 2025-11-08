@@ -1,78 +1,64 @@
 package com.api.stock_management.application.controller;
 
 import java.util.List;
-
-import org.apache.http.HttpStatus;
+import com.api.stock_management.application.dto.product.ProductRequestDTO;
+import com.api.stock_management.application.dto.product.ProductResponseDTO;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.bind.annotation.*;
 import com.api.stock_management.application.service.ProductService;
-import com.api.stock_management.domain.Product;
+import org.springframework.web.multipart.MultipartFile; // Importar
 
 @RestController
-@RequestMapping("/product")
+@RequestMapping("/api/products")
 public class ProductController {
-	
-	   @Autowired
-	    private ProductService productService;
 
-	@PostMapping("/save")
-	public ResponseEntity<String> ProductSave(Product data) {
-		try {
-			Product service = productService.createProduct(data);
-			if (data == null) {
-				return ResponseEntity.status(HttpStatus.SC_BAD_REQUEST).body("Dados invalidos...");
-			}
+    @Autowired
+    private ProductService productService;
 
-			if (service != null) {
-				return ResponseEntity.status(HttpStatus.SC_CREATED).body("Criado com sucesso!");
-			} else {
-				return ResponseEntity.status(HttpStatus.SC_NOT_FOUND).body("Rota não encontrada.");
-			}
-		} catch (Exception ex) {
-			return ResponseEntity.status(HttpStatus.SC_INTERNAL_SERVER_ERROR)
-					.body("Erro interno do servidor: " + ex.getMessage());
-		}
-	}
+    @PostMapping
+    public ResponseEntity<ProductResponseDTO> createProduct(@RequestBody @Valid ProductRequestDTO productRequest) {
+        ProductResponseDTO productResponse = productService.createProduct(productRequest);
 
-	@GetMapping("/getall")
-	public ResponseEntity<String> ProductGetAll() {
-		try {
-			List<Product> service = productService.getallProducts();
+        return ResponseEntity.ok(productResponse);
+    }
 
-			if (service != null) {
-				return ResponseEntity.status(HttpStatus.SC_OK).body("Sucesso!");
-			} else {
-				return ResponseEntity.status(HttpStatus.SC_NOT_FOUND).body("Rota não encontrada.");
-			}
-		} catch (Exception ex) {
-			return ResponseEntity.status(HttpStatus.SC_INTERNAL_SERVER_ERROR)
-					.body("Erro interno do servidor: " + ex.getMessage());
+    @GetMapping
+    public ResponseEntity<List<ProductResponseDTO>> getAllProducts() {
+        List<ProductResponseDTO> productsResponse = productService.getAllProductsBySeller();
 
-		}
-	}
-	
-	@GetMapping("/getby/{id}")
-	public ResponseEntity<String> ProoductGetById(@PathVariable Long id){
-		try {
-			Product service = productService.getProduct(id);
-			
-			if(service != null) {
-				return ResponseEntity.status(HttpStatus.SC_OK).body("Sucesso!");
-			} else {
-				return ResponseEntity.status(HttpStatus.SC_NOT_FOUND).body("Rota não encontrada.");
-			}
-			
-			
-		} catch (Exception ex) {
-			return ResponseEntity.status(HttpStatus.SC_INTERNAL_SERVER_ERROR)
-					.body("Erro interno do servidor: " + ex.getMessage());
-		}
-	}
+        return ResponseEntity.ok(productsResponse);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductResponseDTO> getProductById(@PathVariable Long id) {
+        ProductResponseDTO productResponse = productService.getProductById(id);
+
+        return ResponseEntity.ok(productResponse);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ProductResponseDTO> updateProduct(@PathVariable Long id, @RequestBody @Valid ProductRequestDTO productRequest) {
+        ProductResponseDTO productResponse = productService.updateProduct(id, productRequest);
+
+        return ResponseEntity.ok(productResponse);
+    }
+
+    @PatchMapping("/{id}/inactivate")
+    public ResponseEntity<Void> inactiveProduct(@PathVariable Long id) {
+        productService.inactiveProduct(id);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    // adcionei esse endpoint pra subir a imagem
+    @PatchMapping("/{id}/image")
+    public ResponseEntity<ProductResponseDTO> uploadImage(
+            @PathVariable Long id,
+            @RequestParam("imagem") MultipartFile imagem) {
+
+        ProductResponseDTO productResponse = productService.uploadImage(id, imagem);
+        return ResponseEntity.ok(productResponse);
+    }
 }
