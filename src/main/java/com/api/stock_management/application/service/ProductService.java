@@ -5,18 +5,18 @@ import com.api.stock_management.application.dto.product.ProductResponseDTO;
 import com.api.stock_management.domain.model.Product;
 import com.api.stock_management.domain.model.Seller;
 import com.api.stock_management.domain.repository.ProductRepository;
-import jakarta.annotation.PostConstruct; // Importar
+import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value; // Importar
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile; // Importar
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder; // Importar
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.nio.file.Path; // Importar
-import java.nio.file.Paths; // Importar
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,22 +26,19 @@ public class ProductService {
     @Autowired
     private ProductRepository productRepository;
 
-    // --- NOVA INJEÇÃO DO SERVIÇO DE ARQUIVOS ---
+    // Dependências de arquivo (MANTIDAS para o método antigo)
     @Autowired
     private StorageService fileStorageService;
-
-    // --- NOVA INJEÇÃO DA CONFIGURAÇÃO DO application.properties ---
     @Value("${file.upload-dir.produtos}")
     private String produtosUploadDir;
+    private Path produtosPath;
 
-    private Path produtosPath; // Variável para guardar o caminho completo
-
-    // Este método roda assim que o serviço é criado, preparando o caminho
     @PostConstruct
     public void init() {
         this.produtosPath = Paths.get(produtosUploadDir);
     }
 
+    // --- Métodos Existentes ---
     @Transactional
     public ProductResponseDTO createProduct(ProductRequestDTO productRequestDTO) {
         Seller authenticatedSeller = getAuthenticatedSeller();
@@ -49,7 +46,6 @@ public class ProductService {
         newProduct.setNome(productRequestDTO.getNome());
         newProduct.setPreco(productRequestDTO.getPreco());
         newProduct.setQuantidade(productRequestDTO.getQuantidade());
-        // newProduct.setImagem(productRequestDTO.getImagem()); // LINHA REMOVIDA
         newProduct.setSeller(authenticatedSeller);
         newProduct.setStatus(true);
 
@@ -80,7 +76,6 @@ public class ProductService {
         product.setNome(productRequestDTO.getNome());
         product.setPreco(productRequestDTO.getPreco());
         product.setQuantidade(productRequestDTO.getQuantidade());
-        // product.setImagem(productRequestDTO.getImagem()); removi aqui
 
         Product updateProduct = productRepository.save(product);
         return new ProductResponseDTO(updateProduct);
@@ -94,28 +89,45 @@ public class ProductService {
         productRepository.save(product);
     }
 
-    // Adcionadno upload de imaegm
+    // Método antigo (MultipartFile)
     @Transactional
     public ProductResponseDTO uploadImage(Long id, MultipartFile file) {
         Seller authenticatedSeller = getAuthenticatedSeller();
         Product product = findProductByIdAndOwner(id, authenticatedSeller);
 
-
         String fileName = fileStorageService.store(file, this.produtosPath);
 
-        //url
+        // url
         String urlImagem = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path("/files/produtos/")
                 .path(fileName)
                 .toUriString();
 
-        //atualiza o banco com a url da imagem
+        // atualiza o banco com a url da imagem
         product.setImagem(urlImagem);
         productRepository.save(product);
 
         return new ProductResponseDTO(product);
     }
 
+    // NOVO: Método para receber a URL e salvar no banco
+    @Transactional
+    public ProductResponseDTO setImageUrl(Long productId, String imageUrl) {
+        Seller authenticatedSeller = getAuthenticatedSeller();
+
+        // 1. Encontra o produto pelo ID e verifica se o Seller é o dono
+        Product product = findProductByIdAndOwner(productId, authenticatedSeller);
+
+        // 2. Define a URL da imagem no campo 'img' (no seu modelo é 'imagem')
+        product.setImagem(imageUrl);
+
+        // 3. Salva a alteração no banco de dados
+        Product updatedProduct = productRepository.save(product);
+
+        return new ProductResponseDTO(updatedProduct);
+    }
+
+    // --- Métodos Privados ---
     private Seller getAuthenticatedSeller() {
         return (Seller) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }

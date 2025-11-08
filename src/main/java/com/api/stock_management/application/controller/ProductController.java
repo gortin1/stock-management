@@ -3,12 +3,13 @@ package com.api.stock_management.application.controller;
 import java.util.List;
 import com.api.stock_management.application.dto.product.ProductRequestDTO;
 import com.api.stock_management.application.dto.product.ProductResponseDTO;
+import com.api.stock_management.application.dto.product.ImageUrlRequestDTO; // NOVO
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.api.stock_management.application.service.ProductService;
-import org.springframework.web.multipart.MultipartFile; // Importar
+import org.springframework.web.multipart.MultipartFile; // MANTIDO PARA OUTRAS POSSIBILIDADES, MAS NÃO USADO
 
 @RestController
 @RequestMapping("/api/products")
@@ -52,13 +53,24 @@ public class ProductController {
         return ResponseEntity.noContent().build();
     }
 
-    // adcionei esse endpoint pra subir a imagem
+    // Antigo endpoint de upload de arquivo (MultipartFile)
     @PatchMapping("/{id}/image")
     public ResponseEntity<ProductResponseDTO> uploadImage(
             @PathVariable Long id,
             @RequestParam("imagem") MultipartFile imagem) {
 
         ProductResponseDTO productResponse = productService.uploadImage(id, imagem);
+        return ResponseEntity.ok(productResponse);
+    }
+
+
+    // NOVO: Endpoint para adicionar URL de imagem via JSON
+    @PatchMapping("/{id}/image-url")
+    public ResponseEntity<ProductResponseDTO> setImageFromUrl(
+            @PathVariable Long id,
+            @RequestBody @Valid ImageUrlRequestDTO imageUrlRequest) {
+
+        ProductResponseDTO productResponse = productService.setImageUrl(id, imageUrlRequest.getImageUrl());
         return ResponseEntity.ok(productResponse);
     }
 }

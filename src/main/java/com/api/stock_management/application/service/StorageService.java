@@ -1,11 +1,9 @@
-package com.api.stock_management.application.service;
+package com.api.stock_management.application.service; // Ajuste o pacote se necessário
 
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -13,32 +11,41 @@ import java.util.UUID;
 
 @Service
 public class StorageService {
-    public String store(MultipartFile file, Path uploadPath) {
-        if (file.isEmpty()) {
-            throw new RuntimeException("Falha ao armazenar arquivo vazio.");
+
+    /**
+     * Armazena o arquivo fornecido no caminho especificado.
+     * * @param file O arquivo a ser armazenado.
+     * @param rootPath O caminho raiz onde o arquivo deve ser salvo.
+     * @return O nome do arquivo gerado (incluindo a extensão).
+     */
+    public String store(MultipartFile file, Path rootPath) {
+        // Gera um nome único para o arquivo
+        String originalFilename = file.getOriginalFilename();
+        String extension = "";
+
+        if (originalFilename != null && originalFilename.contains(".")) {
+            extension = originalFilename.substring(originalFilename.lastIndexOf("."));
         }
 
-        // Limpa o nome do arquivo e gera um nome único
-        String originalFilename = StringUtils.cleanPath(file.getOriginalFilename());
-        String fileExtension = "";
+        // Nome único usando UUID e a extensão original
+        String fileName = UUID.randomUUID().toString() + extension;
+
         try {
-            // Pega a extensão (ex: .png, .jpg)
-            fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
-        } catch(Exception e) {
-            fileExtension = "";
-        }
-        String fileName = UUID.randomUUID().toString() + fileExtension;
+            // Garante que o diretório de destino exista
+            if (!Files.exists(rootPath)) {
+                Files.createDirectories(rootPath);
+            }
 
-        try (InputStream inputStream = file.getInputStream()) {
+            // Resolve o caminho completo do arquivo
+            Path destinationFile = rootPath.resolve(fileName);
 
-            Files.createDirectories(uploadPath);
-
-            Path targetLocation = uploadPath.resolve(fileName);
-
-            Files.copy(inputStream, targetLocation, StandardCopyOption.REPLACE_EXISTING);
+            // Copia o conteúdo do arquivo para o destino
+            Files.copy(file.getInputStream(), destinationFile, StandardCopyOption.REPLACE_EXISTING);
 
             return fileName;
+
         } catch (IOException e) {
+            // Lança exceção se houver problema ao salvar
             throw new RuntimeException("Falha ao armazenar o arquivo " + fileName, e);
         }
     }
