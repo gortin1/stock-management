@@ -12,7 +12,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
 @Service
-public class FileStorageService {
+public class StorageService {
     public String store(MultipartFile file, Path uploadPath) {
         if (file.isEmpty()) {
             throw new RuntimeException("Falha ao armazenar arquivo vazio.");
