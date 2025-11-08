@@ -30,14 +30,14 @@ public class StorageService {
         String fileName = UUID.randomUUID().toString() + fileExtension;
 
         try (InputStream inputStream = file.getInputStream()) {
-            // Garante que o diretório de destino existe (ex: ./uploads/produtos)
+
             Files.createDirectories(uploadPath);
 
             Path targetLocation = uploadPath.resolve(fileName);
-            // Copia o arquivo para o disco
+
             Files.copy(inputStream, targetLocation, StandardCopyOption.REPLACE_EXISTING);
 
-            return fileName; // Retorna o novo nome
+            return fileName;
         } catch (IOException e) {
             throw new RuntimeException("Falha ao armazenar o arquivo " + fileName, e);
         }

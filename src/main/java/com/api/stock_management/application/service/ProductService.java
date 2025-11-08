@@ -28,7 +28,7 @@ public class ProductService {
 
     // --- NOVA INJEÇÃO DO SERVIÇO DE ARQUIVOS ---
     @Autowired
-    private FileStorageService fileStorageService;
+    private StorageService fileStorageService;
 
     // --- NOVA INJEÇÃO DA CONFIGURAÇÃO DO application.properties ---
     @Value("${file.upload-dir.produtos}")

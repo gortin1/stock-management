@@ -36,7 +36,7 @@ public class SellerService {
 
 
     @Autowired
-    private FileStorageService fileStorageService;
+    private StorageService fileStorageService;
 
     //Não aguebtomais
     @Value("${file.upload-dir.sellers}")
