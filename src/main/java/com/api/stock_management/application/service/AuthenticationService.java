@@ -2,6 +2,7 @@ package com.api.stock_management.application.service;
 
 import com.api.stock_management.application.dto.auth.TokenResponseDTO;
 import com.api.stock_management.application.dto.login.LoginRequestDTO;
+import com.api.stock_management.application.dto.seller.SellerResponseDTO;
 import com.api.stock_management.domain.model.Seller;
 import com.api.stock_management.infrastructure.security.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,8 @@ public class AuthenticationService {
         var auth = this.authenticationManager.authenticate(usernamePassword);
         var seller = (Seller) auth.getPrincipal();
         String token = tokenService.generateToken(seller);
+        SellerResponseDTO userDTO = new SellerResponseDTO(seller);
 
-        return new TokenResponseDTO(token);
+        return new TokenResponseDTO(token, userDTO);
     }
 }
