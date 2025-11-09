@@ -1,13 +1,16 @@
 package com.api.stock_management.application.controller;
 
+import java.io.IOException;
 import java.util.List;
 import com.api.stock_management.application.dto.product.ProductRequestDTO;
 import com.api.stock_management.application.dto.product.ProductResponseDTO;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.api.stock_management.application.service.ProductService;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/products")
@@ -17,8 +20,8 @@ public class ProductController {
 	private ProductService productService;
 
 	@PostMapping
-	public ResponseEntity<ProductResponseDTO> createProduct(@RequestBody @Valid ProductRequestDTO productRequest) {
-		ProductResponseDTO productResponse = productService.createProduct(productRequest);
+	public ResponseEntity<ProductResponseDTO> createProduct(@Valid ProductRequestDTO productRequest, @RequestParam("imagem") MultipartFile imagem) throws IOException {
+		ProductResponseDTO productResponse = productService.createProduct(productRequest, imagem);
 
 		return ResponseEntity.ok(productResponse);
 	}
@@ -38,8 +41,8 @@ public class ProductController {
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<ProductResponseDTO> updateProduct(@PathVariable Long id, @RequestBody @Valid ProductRequestDTO productRequest) {
-		ProductResponseDTO productResponse = productService.updateProduct(id, productRequest);
+	public ResponseEntity<ProductResponseDTO> updateProduct(@PathVariable Long id, @Valid ProductRequestDTO productRequest, @RequestParam("imagem") MultipartFile imagem) throws IOException {
+		ProductResponseDTO productResponse = productService.updateProduct(id, productRequest, imagem);
 
 		return ResponseEntity.ok(productResponse);
 	}

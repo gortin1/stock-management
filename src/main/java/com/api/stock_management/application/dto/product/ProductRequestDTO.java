@@ -23,5 +23,4 @@ public class ProductRequestDTO {
     @PositiveOrZero(message = "A quantidade deve ser maior ou igual a zero.")
     private Integer quantidade;
 
-    private String imagem;
 }
