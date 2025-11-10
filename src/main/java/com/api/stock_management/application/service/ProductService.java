@@ -2,6 +2,7 @@ package com.api.stock_management.application.service;
 
 import com.api.stock_management.application.dto.product.ProductRequestDTO;
 import com.api.stock_management.application.dto.product.ProductResponseDTO;
+import com.api.stock_management.application.dto.product.StatusProduct;
 import com.api.stock_management.domain.model.Product;
 import com.api.stock_management.domain.model.Seller;
 import com.api.stock_management.domain.repository.ProductRepository;
@@ -64,7 +65,7 @@ public class ProductService {
         newProduct.setQuantidade(productRequestDTO.getQuantidade());
         newProduct.setImagem(nomeArquivoUnico);
         newProduct.setSeller(authenticatedSeller);
-        newProduct.setStatus(true);
+        newProduct.setStatusProduto(StatusProduct.ATIVO);
 
         Product savedProduct = productRepository.save(newProduct);
         return new ProductResponseDTO(savedProduct);
@@ -127,10 +128,18 @@ public class ProductService {
     @Transactional
     public void inactiveProduct(Long id) {
         Product product = findProductByIdAndOwner(id, getAuthenticatedSeller());
-        product.setStatus(false);
+        product.setStatusProduto(StatusProduct.INATIVO);
 
         productRepository.save(product);
     }
+    @Transactional
+    public void activacteProduct(Long id) {
+        Product product = findProductByIdAndOwner(id, getAuthenticatedSeller());
+        product.setStatusProduto(StatusProduct.ATIVO);
+
+        productRepository.save(product);
+    }
+
 
     private Seller getAuthenticatedSeller() {
         return (Seller) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

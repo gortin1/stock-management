@@ -12,7 +12,7 @@ public class ProductResponseDTO {
     private String nome;
     private BigDecimal preco;
     private Integer quantidade;
-    private boolean status;
+    private StatusProduct statusProduto;
     private String imagem;
     private Long sellerId;
 
@@ -21,7 +21,7 @@ public class ProductResponseDTO {
         this.nome = product.getNome();
         this.preco = product.getPreco();
         this.quantidade = product.getQuantidade();
-        this.status = product.isStatus();
+        this.statusProduto = product.getStatusProduto();
         this.imagem = product.getImagem();
         this.sellerId = product.getSeller().getId();
     }

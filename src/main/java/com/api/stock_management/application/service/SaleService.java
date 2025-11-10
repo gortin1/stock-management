@@ -1,5 +1,6 @@
 package com.api.stock_management.application.service;
 
+import com.api.stock_management.application.dto.product.StatusProduct;
 import com.api.stock_management.application.dto.sale.SaleRequestDTO;
 import com.api.stock_management.application.dto.sale.SaleResponseDTO;
 import com.api.stock_management.domain.model.Product;
@@ -62,11 +63,13 @@ public class SaleService {
         if (!product.getSeller().getId().equals(seller.getId())) {
             throw new SecurityException("Produto não encontrado.");
         }
-
-        if (!product.isStatus()) {
-            throw new IllegalStateException("Produto inativo.");
+        if (product.getStatusProduto() == StatusProduct.INATIVO) {
+            throw new IllegalStateException("Não é possível vender um produto inativo.");
         }
 
+        if (product.getStatusProduto() == StatusProduct.EM_FALTA) {
+            throw new IllegalStateException("Não é possível vender um produto que está em falta.");
+        }
         if (product.getQuantidade() < saleRequestDTO.getQuantidade()) {
             throw new IllegalStateException("Estoque insuficiente. Quantidade disponível: " + product.getQuantidade());
         }
