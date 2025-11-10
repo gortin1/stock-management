@@ -88,8 +88,14 @@ public class ProductService {
     }
 
     @Transactional
-    public ProductResponseDTO updateProduct(Long id, ProductRequestDTO productRequestDTO, MultipartFile imagem) throws IOException {
+    public ProductResponseDTO updateProduct(Long id, ProductRequestDTO productRequestDTO) throws IOException {
         Product product = findProductByIdAndOwner(id, getAuthenticatedSeller());
+
+        MultipartFile imagem = productRequestDTO.getImagem();
+
+        product.setNome(productRequestDTO.getNome());
+        product.setPreco(productRequestDTO.getPreco());
+        product.setQuantidade(productRequestDTO.getQuantidade());
 
         if (imagem != null && !imagem.isEmpty()) {
             try {
@@ -108,7 +114,6 @@ public class ProductService {
                 try (InputStream inputStream = imagem.getInputStream()){
                     Files.copy(inputStream, caminhoDoArquivo, StandardCopyOption.REPLACE_EXISTING);
                 }
-
                 product.setImagem(nomeArquivoUnico);
 
             } catch (IOException e) {
@@ -116,15 +121,9 @@ public class ProductService {
                 throw new RuntimeException("Não foi possível salvar a imagem." + e.getMessage());
             }
         }
-
-        product.setNome(productRequestDTO.getNome());
-        product.setPreco(productRequestDTO.getPreco());
-        product.setQuantidade(productRequestDTO.getQuantidade());
-
-        Product updateProduct = productRepository.save(product);
-        return new ProductResponseDTO(updateProduct);
+        Product updatedProduct = productRepository.save(product);
+        return new ProductResponseDTO(updatedProduct);
     }
-
     @Transactional
     public void inactiveProduct(Long id) {
         Product product = findProductByIdAndOwner(id, getAuthenticatedSeller());

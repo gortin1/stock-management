@@ -40,13 +40,15 @@ public class ProductController {
 		return ResponseEntity.ok(productResponse);
 	}
 
-	@PutMapping("/{id}")
-	public ResponseEntity<ProductResponseDTO> updateProduct(@PathVariable Long id, @Valid ProductRequestDTO productRequest, @RequestParam("imagem") MultipartFile imagem) throws IOException {
-		ProductResponseDTO productResponse = productService.updateProduct(id, productRequest, imagem);
+	@PostMapping("/{id}")
+	public ResponseEntity<ProductResponseDTO> updateProduct(
+			@PathVariable Long id,
+			@ModelAttribute ProductRequestDTO productRequestDTO
+	) throws IOException {
 
-		return ResponseEntity.ok(productResponse);
+		ProductResponseDTO updatedProduct = productService.updateProduct(id, productRequestDTO);
+		return ResponseEntity.ok(updatedProduct);
 	}
-
 	@PatchMapping("/{id}/inactivate")
 	public ResponseEntity<Void> inactiveProduct(@PathVariable Long id) {
 		productService.inactiveProduct(id);
