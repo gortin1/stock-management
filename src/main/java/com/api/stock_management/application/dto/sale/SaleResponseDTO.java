@@ -10,18 +10,18 @@ import java.time.LocalDateTime;
 @Setter
 public class SaleResponseDTO {
     private Long id;
+    private Long pedidoId;
     private Long produtoId;
     private String produtoNome;
     private Integer quantidadeVendida;
     private BigDecimal precoNoMomentoDaVenda;
-    private LocalDateTime dataDaVenda;
 
     public SaleResponseDTO(Sale sale) {
         this.id = sale.getId();
+        this.pedidoId = sale.getPedido().getId();
         this.produtoId = sale.getProduct().getId();
         this.produtoNome = sale.getProduct().getNome();
         this.quantidadeVendida = sale.getQuantidadeVendida();
         this.precoNoMomentoDaVenda = sale.getPrecoNoMomentoDaVenda();
-        this.dataDaVenda = sale.getDataDaVenda();
     }
 }
