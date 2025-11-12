@@ -2,6 +2,7 @@ package com.api.stock_management.application.service;
 
 import com.api.stock_management.application.dto.product.ProductRequestDTO;
 import com.api.stock_management.application.dto.product.ProductResponseDTO;
+import com.api.stock_management.application.dto.product.StatusProduct;
 import com.api.stock_management.domain.model.Product;
 import com.api.stock_management.domain.model.Seller;
 import com.api.stock_management.domain.repository.ProductRepository;
@@ -10,25 +11,61 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-public class ProductService{
+public class ProductService {
 
     @Autowired
     private ProductRepository productRepository;
 
     @Transactional
-    public ProductResponseDTO createProduct(ProductRequestDTO productRequestDTO) {
+    public ProductResponseDTO createProduct(ProductRequestDTO productRequestDTO, MultipartFile imagem) throws IOException {
+        String nomeArquivoUnico = null;
+
+        if (imagem != null && !imagem.isEmpty()) {
+            try {
+                String UPLOAD_DIR = "uploads/";
+                Path uploadPath = Paths.get(UPLOAD_DIR);
+
+                if (!Files.exists(uploadPath)) {
+                    Files.createDirectories(uploadPath);
+                }
+
+                String nomeOriginal = imagem.getOriginalFilename();
+                nomeArquivoUnico = UUID.randomUUID().toString() + "-" + nomeOriginal;
+
+                Path caminhoDoArquivo = uploadPath.resolve(nomeArquivoUnico);
+
+                try (InputStream inputStream = imagem.getInputStream()){
+                    Files.copy(inputStream, caminhoDoArquivo, StandardCopyOption.REPLACE_EXISTING);
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new RuntimeException("Não foi possível salvar a imagem." + e.getMessage());
+
+            }
+        }
+
         Seller authenticatedSeller = getAuthenticatedSeller();
         Product newProduct = new Product();
         newProduct.setNome(productRequestDTO.getNome());
         newProduct.setPreco(productRequestDTO.getPreco());
         newProduct.setQuantidade(productRequestDTO.getQuantidade());
-        newProduct.setImagem(productRequestDTO.getImagem());
+        newProduct.setImagem(nomeArquivoUnico);
         newProduct.setSeller(authenticatedSeller);
-        newProduct.setStatus(true);
+        newProduct.setStatusProduto(StatusProduct.ATIVO);
 
         Product savedProduct = productRepository.save(newProduct);
         return new ProductResponseDTO(savedProduct);
@@ -52,24 +89,57 @@ public class ProductService{
     }
 
     @Transactional
-    public ProductResponseDTO updateProduct(Long id, ProductRequestDTO productRequestDTO) {
+    public ProductResponseDTO updateProduct(Long id, ProductRequestDTO productRequestDTO) throws IOException {
         Product product = findProductByIdAndOwner(id, getAuthenticatedSeller());
+
+        MultipartFile imagem = productRequestDTO.getImagem();
+
         product.setNome(productRequestDTO.getNome());
         product.setPreco(productRequestDTO.getPreco());
         product.setQuantidade(productRequestDTO.getQuantidade());
-        product.setImagem(productRequestDTO.getImagem());
 
-        Product updateProduct = productRepository.save(product);
-        return new ProductResponseDTO(updateProduct);
+        if (imagem != null && !imagem.isEmpty()) {
+            try {
+                String UPLOAD_DIR = "uploads/";
+                Path uploadPath = Paths.get(UPLOAD_DIR);
+
+                if (!Files.exists(uploadPath)) {
+                    Files.createDirectories(uploadPath);
+                }
+
+                String nomeOriginal = imagem.getOriginalFilename();
+                String nomeArquivoUnico = UUID.randomUUID().toString() + "-" + nomeOriginal;
+
+                Path caminhoDoArquivo = uploadPath.resolve(nomeArquivoUnico);
+
+                try (InputStream inputStream = imagem.getInputStream()){
+                    Files.copy(inputStream, caminhoDoArquivo, StandardCopyOption.REPLACE_EXISTING);
+                }
+                product.setImagem(nomeArquivoUnico);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new RuntimeException("Não foi possível salvar a imagem." + e.getMessage());
+            }
+        }
+        Product updatedProduct = productRepository.save(product);
+        return new ProductResponseDTO(updatedProduct);
     }
-
     @Transactional
     public void inactiveProduct(Long id) {
         Product product = findProductByIdAndOwner(id, getAuthenticatedSeller());
-        product.setStatus(false);
+        product.setStatusProduto(StatusProduct.INATIVO);
 
         productRepository.save(product);
     }
+    @Transactional
+    public void activacteProduct(Long id) {
+        Product product = findProductByIdAndOwner(id, getAuthenticatedSeller());
+        product.setStatusProduto(StatusProduct.ATIVO);
+
+        productRepository.save(product);
+    }
+
 
     private Seller getAuthenticatedSeller() {
         return (Seller) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

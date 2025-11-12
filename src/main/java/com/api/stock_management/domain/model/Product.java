@@ -1,5 +1,6 @@
 package com.api.stock_management.domain.model;
 
+import com.api.stock_management.application.dto.product.StatusProduct;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
@@ -24,9 +25,20 @@ public class Product {
     @Column(nullable = false)
     private Integer quantidade;
 
-    @Column(nullable = false)
-    private boolean status;
+    @Enumerated(EnumType.STRING)
+    private StatusProduct statusProduto;
 
+    @PrePersist
+    @PreUpdate
+    public void atualizarStatus() {
+        if (quantidade <= 0) {
+            statusProduto = StatusProduct.EM_FALTA;
+        } else {
+            if (this.statusProduto == null || this.statusProduto == StatusProduct.EM_FALTA) {
+                statusProduto = StatusProduct.ATIVO;
+            }
+        }
+    }
     @Column
     private String imagem;
 
