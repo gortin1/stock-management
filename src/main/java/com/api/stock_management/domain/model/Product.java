@@ -1,5 +1,6 @@
 package com.api.stock_management.domain.model;
 
+import com.api.stock_management.application.dto.product.StatusProduct;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
@@ -24,8 +25,9 @@ public class Product {
     @Column(nullable = false)
     private Integer quantidade;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private boolean status;
+    private StatusProduct statusProduto;
 
     @Column(length = 1024)
     private String imagem;
@@ -33,4 +35,16 @@ public class Product {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id", nullable = false)
     private Seller seller;
+
+    @PrePersist
+    @PreUpdate
+    public void atualizarStatus() {
+        if (this.statusProduto == null || this.statusProduto == StatusProduct.ATIVO) {
+            if (this.quantidade <= 0) {
+                this.statusProduto = StatusProduct.EM_FALTA;
+            } else {
+                this.statusProduto = StatusProduct.ATIVO;
+            }
+        }
+    }
 }
