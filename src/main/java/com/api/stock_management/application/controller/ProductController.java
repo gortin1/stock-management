@@ -1,5 +1,6 @@
 package com.api.stock_management.application.controller;
 
+import java.io.IOException;
 import java.util.List;
 import com.api.stock_management.application.dto.product.ProductRequestDTO;
 import com.api.stock_management.application.dto.product.ProductResponseDTO;
@@ -17,7 +18,7 @@ public class ProductController {
 	private ProductService productService;
 
 	@PostMapping
-	public ResponseEntity<ProductResponseDTO> createProduct(@RequestBody @Valid ProductRequestDTO productRequest) {
+	public ResponseEntity<ProductResponseDTO> createProduct(@RequestBody @Valid ProductRequestDTO productRequest) throws IOException {
 		ProductResponseDTO productResponse = productService.createProduct(productRequest);
 
 		return ResponseEntity.ok(productResponse);
@@ -38,7 +39,7 @@ public class ProductController {
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<ProductResponseDTO> updateProduct(@PathVariable Long id, @RequestBody @Valid ProductRequestDTO productRequest) {
+	public ResponseEntity<ProductResponseDTO> updateProduct(@PathVariable Long id, @RequestBody @Valid ProductRequestDTO productRequest) throws IOException {
 		ProductResponseDTO productResponse = productService.updateProduct(id, productRequest);
 
 		return ResponseEntity.ok(productResponse);

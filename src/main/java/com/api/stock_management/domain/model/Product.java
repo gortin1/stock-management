@@ -27,7 +27,7 @@ public class Product {
     @Column(nullable = false)
     private boolean status;
 
-    @Column
+    @Column(length = 1024)
     private String imagem;
 
     @ManyToOne(fetch = FetchType.LAZY)

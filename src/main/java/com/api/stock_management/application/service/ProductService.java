@@ -5,12 +5,18 @@ import com.api.stock_management.application.dto.product.ProductResponseDTO;
 import com.api.stock_management.domain.model.Product;
 import com.api.stock_management.domain.model.Seller;
 import com.api.stock_management.domain.repository.ProductRepository;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils; // 1. Importar
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile; // 2. Importar
+
+import java.io.IOException; // 3. Importar
 import java.util.List;
+import java.util.Map; // 4. Importar
 import java.util.stream.Collectors;
 
 @Service
@@ -18,17 +24,24 @@ public class ProductService{
 
     @Autowired
     private ProductRepository productRepository;
+    @Autowired
+    private Cloudinary cloudinary;
 
     @Transactional
-    public ProductResponseDTO createProduct(ProductRequestDTO productRequestDTO) {
+    public ProductResponseDTO createProduct(ProductRequestDTO productRequestDTO) throws IOException {
         Seller authenticatedSeller = getAuthenticatedSeller();
         Product newProduct = new Product();
         newProduct.setNome(productRequestDTO.getNome());
         newProduct.setPreco(productRequestDTO.getPreco());
         newProduct.setQuantidade(productRequestDTO.getQuantidade());
-        newProduct.setImagem(productRequestDTO.getImagem());
         newProduct.setSeller(authenticatedSeller);
         newProduct.setStatus(true);
+
+        MultipartFile imagem = productRequestDTO.getImagem();
+        if (imagem != null && !imagem.isEmpty()) {
+            String imageUrl = uploadImage(imagem);
+            newProduct.setImagem(imageUrl);
+        }
 
         Product savedProduct = productRepository.save(newProduct);
         return new ProductResponseDTO(savedProduct);
@@ -52,12 +65,17 @@ public class ProductService{
     }
 
     @Transactional
-    public ProductResponseDTO updateProduct(Long id, ProductRequestDTO productRequestDTO) {
+    public ProductResponseDTO updateProduct(Long id, ProductRequestDTO productRequestDTO) throws IOException {
         Product product = findProductByIdAndOwner(id, getAuthenticatedSeller());
         product.setNome(productRequestDTO.getNome());
         product.setPreco(productRequestDTO.getPreco());
         product.setQuantidade(productRequestDTO.getQuantidade());
-        product.setImagem(productRequestDTO.getImagem());
+
+        MultipartFile imagem = productRequestDTO.getImagem();
+        if (imagem != null && !imagem.isEmpty()) {
+            String imageUrl = uploadImage(imagem);
+            product.setImagem(imageUrl);
+        }
 
         Product updateProduct = productRepository.save(product);
         return new ProductResponseDTO(updateProduct);
@@ -78,5 +96,11 @@ public class ProductService{
     private Product findProductByIdAndOwner(Long productId, Seller owner) {
         return productRepository.findById(productId).filter(product -> product.getSeller().getId().equals(owner.getId()))
                 .orElseThrow(() -> new EntityNotFoundException("Produto não encontrado."));
+    }
+
+    private String uploadImage(MultipartFile file) throws IOException {
+        Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
+
+        return (String) uploadResult.get("secure_url");
     }
 }
