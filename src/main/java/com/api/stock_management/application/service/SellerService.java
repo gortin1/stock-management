@@ -7,6 +7,7 @@ import com.api.stock_management.domain.model.Seller;
 import com.api.stock_management.domain.repository.SellerRepository;
 import com.api.stock_management.infrastructure.messaging.TwilioService;
 import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -56,7 +57,7 @@ public class SellerService {
     @Transactional
     public SellerResponseDTO activateSeller(SellerActivateRequestDTO sellerActivateRequestDTO){
         Seller seller = sellerRepository.findByCelular(sellerActivateRequestDTO.getCelular())
-                .orElseThrow(()-> new RuntimeException("Vendedor não encontrado."));
+                .orElseThrow(()-> new EntityNotFoundException("Vendedor ou código de ativação inválido."));
 
         if (seller.isStatus()) {
             throw new IllegalStateException("Esta conta já está ativa.");

@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.math.BigDecimal;
 
 @Getter
@@ -23,5 +25,6 @@ public class ProductRequestDTO {
     @PositiveOrZero(message = "A quantidade deve ser maior ou igual a zero.")
     private Integer quantidade;
 
-    private String imagem;
+    private MultipartFile imagem;
+
 }
