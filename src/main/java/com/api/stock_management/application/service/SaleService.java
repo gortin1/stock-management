@@ -41,7 +41,7 @@ public class SaleService {
         List<Sale> sales = saleRepository.findAllBySeller(authenticatedSeller);
 
         return sales.stream()
-                .map(SaleResponseDTO::new)
+                .map(sale -> new SaleResponseDTO(sale, sale.getPedido()))
                 .collect(Collectors.toList());
     }
 
@@ -72,12 +72,13 @@ public class SaleService {
             newSaleItem.setQuantidadeVendida(itemDTO.getQuantidade());
             newSaleItem.setPrecoNoMomentoDaVenda(product.getPreco());
             newSaleItem.setPedido(savedPedido);
+            newSaleItem.setDataDaVenda(LocalDateTime.now());
 
             savedSalesItems.add(saleRepository.save(newSaleItem));
         }
 
         return savedSalesItems.stream()
-                .map(SaleResponseDTO::new)
+                .map(sale -> new SaleResponseDTO(sale, sale.getPedido()))
                 .collect(Collectors.toList());
     }
 

@@ -24,16 +24,12 @@ public class Sale {
     @JoinColumn(name = "pedido_id", nullable = false)
     private Pedido pedido;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "seller_id", nullable = false)
-//    private Seller seller;
-
     @Column(nullable = false)
     private Integer quantidadeVendida;
 
     @Column(nullable = false)
     private BigDecimal precoNoMomentoDaVenda;
 
-//    @Column(nullable = false)
-//    private LocalDateTime dataDaVenda;
+    @Column(name = "data_da_venda", nullable = false)
+    private LocalDateTime dataDaVenda;
 }
