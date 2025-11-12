@@ -56,4 +56,10 @@ public class ProductController {
 
 		return ResponseEntity.noContent().build();
 	}
+	@PatchMapping("/{id}/activate")
+	public ResponseEntity<Void> activateProduct(@PathVariable Long id) {
+		productService.activateProduct(id);
+
+		return ResponseEntity.noContent().build();
+	}
 }

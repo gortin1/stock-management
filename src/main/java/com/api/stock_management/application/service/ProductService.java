@@ -84,7 +84,7 @@ public class ProductService{
     public void inactiveProduct(Long id) {
         Product product = findProductByIdAndOwner(id, getAuthenticatedSeller());
 
-        product.setStatusProduto(StatusProduct.INATIVO); // Usa o Enum
+        product.setStatusProduto(StatusProduct.INATIVO);
 
         productRepository.save(product);
     }
