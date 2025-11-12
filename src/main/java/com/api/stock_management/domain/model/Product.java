@@ -39,12 +39,13 @@ public class Product {
     @PrePersist
     @PreUpdate
     public void atualizarStatus() {
-        if (this.statusProduto == null || this.statusProduto == StatusProduct.ATIVO) {
-            if (this.quantidade <= 0) {
-                this.statusProduto = StatusProduct.EM_FALTA;
-            } else {
-                this.statusProduto = StatusProduct.ATIVO;
-            }
+        if (this.quantidade <= 0) {
+            this.statusProduto = StatusProduct.EM_FALTA;
+            return;
+        }
+
+        if (this.statusProduto == StatusProduct.EM_FALTA || this.statusProduto == null) {
+            this.statusProduto = StatusProduct.ATIVO;
         }
     }
 }
