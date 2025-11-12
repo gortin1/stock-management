@@ -2,21 +2,22 @@ package com.api.stock_management.application.service;
 
 import com.api.stock_management.application.dto.product.ProductRequestDTO;
 import com.api.stock_management.application.dto.product.ProductResponseDTO;
+import com.api.stock_management.application.dto.product.StatusProduct; // 1. IMPORTAR O ENUM
 import com.api.stock_management.domain.model.Product;
 import com.api.stock_management.domain.model.Seller;
 import com.api.stock_management.domain.repository.ProductRepository;
 import com.cloudinary.Cloudinary;
-import com.cloudinary.utils.ObjectUtils; // 1. Importar
+import com.cloudinary.utils.ObjectUtils;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile; // 2. Importar
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException; // 3. Importar
+import java.io.IOException;
 import java.util.List;
-import java.util.Map; // 4. Importar
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,15 +29,13 @@ public class ProductService{
     private Cloudinary cloudinary;
 
     @Transactional
-    public ProductResponseDTO createProduct(ProductRequestDTO productRequestDTO) throws IOException {
+    public ProductResponseDTO createProduct(ProductRequestDTO productRequestDTO) throws IOException { // Adicionado 'throws'
         Seller authenticatedSeller = getAuthenticatedSeller();
         Product newProduct = new Product();
         newProduct.setNome(productRequestDTO.getNome());
         newProduct.setPreco(productRequestDTO.getPreco());
         newProduct.setQuantidade(productRequestDTO.getQuantidade());
         newProduct.setSeller(authenticatedSeller);
-        newProduct.setStatus(true);
-
         MultipartFile imagem = productRequestDTO.getImagem();
         if (imagem != null && !imagem.isEmpty()) {
             String imageUrl = uploadImage(imagem);
@@ -65,7 +64,7 @@ public class ProductService{
     }
 
     @Transactional
-    public ProductResponseDTO updateProduct(Long id, ProductRequestDTO productRequestDTO) throws IOException {
+    public ProductResponseDTO updateProduct(Long id, ProductRequestDTO productRequestDTO) throws IOException { // Adicionado 'throws'
         Product product = findProductByIdAndOwner(id, getAuthenticatedSeller());
         product.setNome(productRequestDTO.getNome());
         product.setPreco(productRequestDTO.getPreco());
@@ -84,7 +83,16 @@ public class ProductService{
     @Transactional
     public void inactiveProduct(Long id) {
         Product product = findProductByIdAndOwner(id, getAuthenticatedSeller());
-        product.setStatus(false);
+
+        product.setStatusProduto(StatusProduct.INATIVO); // Usa o Enum
+
+        productRepository.save(product);
+    }
+
+    @Transactional
+    public void activateProduct(Long id) {
+        Product product = findProductByIdAndOwner(id, getAuthenticatedSeller());
+        product.setStatusProduto(StatusProduct.ATIVO);
 
         productRepository.save(product);
     }
@@ -100,7 +108,6 @@ public class ProductService{
 
     private String uploadImage(MultipartFile file) throws IOException {
         Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
-
         return (String) uploadResult.get("secure_url");
     }
 }
