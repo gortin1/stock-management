@@ -61,8 +61,9 @@ public class SecurityConfig {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
-        // Assegure-se de que "PUT" está na lista (ele já está, o que é bom)
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000",
+                "https://front-stock-management-c1tjsynaa-gortin1s-projects.vercel.app"));
+
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE","PATCH", "OPTIONS", "HEAD"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
