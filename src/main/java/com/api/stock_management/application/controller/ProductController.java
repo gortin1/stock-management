@@ -40,7 +40,7 @@ public class ProductController {
 		return ResponseEntity.ok(productResponse);
 	}
 
-	@PutMapping("/{id}")
+	@PostMapping("/{id}")
 	public ResponseEntity<ProductResponseDTO> updateProduct(
 			@PathVariable Long id,
 			@ModelAttribute @Valid ProductRequestDTO productRequest) throws IOException {
