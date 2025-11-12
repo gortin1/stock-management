@@ -18,7 +18,9 @@ public class ProductController {
 	private ProductService productService;
 
 	@PostMapping
-	public ResponseEntity<ProductResponseDTO> createProduct(@RequestBody @Valid ProductRequestDTO productRequest) throws IOException {
+	public ResponseEntity<ProductResponseDTO> createProduct(
+			@ModelAttribute @Valid ProductRequestDTO productRequest) throws IOException {
+
 		ProductResponseDTO productResponse = productService.createProduct(productRequest);
 
 		return ResponseEntity.ok(productResponse);
@@ -39,7 +41,10 @@ public class ProductController {
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<ProductResponseDTO> updateProduct(@PathVariable Long id, @RequestBody @Valid ProductRequestDTO productRequest) throws IOException {
+	public ResponseEntity<ProductResponseDTO> updateProduct(
+			@PathVariable Long id,
+			@ModelAttribute @Valid ProductRequestDTO productRequest) throws IOException {
+
 		ProductResponseDTO productResponse = productService.updateProduct(id, productRequest);
 
 		return ResponseEntity.ok(productResponse);
